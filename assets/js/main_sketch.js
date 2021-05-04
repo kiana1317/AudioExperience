@@ -7,10 +7,12 @@ let labels_list = [];
 // Number of sketches
 let num_of_classifiers = 9;
 
-let sample_classifier = "rave";
-
+let current_alpha;
 let alpha_bound = 255 / num_of_classifiers - 1;
 
+
+
+let waiting_message = "Classifying..."
 
 // Classifier and model url
 let classifier;
@@ -25,6 +27,9 @@ function preload() {
 function setup() {
     createCanvas(window.innerWidth, window.innerHeight);
 
+
+    textSize(window.innerWidth / 30);
+    textAlign(CENTER, CENTER);
     // STEP 2: Start classifying (will listen to mic by default)
     classifyAudio();
 }
@@ -35,31 +40,60 @@ function classifyAudio() {
 }
 
 function draw() {
-    background(200);
+    background(255);
 
     // Wait until the classifier starts to begin running sketches
     print(labels_dict)
-    if (labels_dict[sample_classifier] == null){
+    if (labels_list.length == 0){
         console.log("Not executing");
+        text(waiting_message, window.innerWidth/2, window.innerHeight/2);
         return;
     }
 
     // Call each sketch
+    for(i = 0; i < labels_list.length; i++){
 
-    // blackHole();
-    // banjo();
-    // birdSong();
-    // ding();
-    // guitarStrum();
-    // percussive();
-    if (labels_dict["rain"] < alpha_bound){
-        rain();
+        let current_label = labels_list[i];
+
+        // Stores the current alpha value
+        current_alpha = labels_dict[current_label];
+
+        // Check if the confidence is high enough to render
+        if (labels_dict[current_label] < alpha_bound){
+            break;
+        }
+        else if(current_label == "Black Hole"){
+            blackHole();
+        }
+        else if(current_label == "banjo"){
+            banjo();
+        }
+        else if(current_label == "bird song"){
+            birdSong();
+        }
+        else if(current_label == "ding"){
+            ding();
+        }
+        else if(current_label == "guitar strum"){
+            guitarStrum();
+        }
+        else if(current_label == "percussive"){
+            percussive();
+        }
+        else if(current_label == "rain"){
+            rain();
+        }
+        else if(current_label == "rave"){
+            rave();
+        }
+        else if(current_label == "wish you were here"){
+            wishYouWereHere();
+        }
+        else if(labels_dict["Background Noise"] > 255 - alpha_bound){
+            text("Background", window.innerWidth/2, window.innerHeight/2);
+            break;
+        }
     }
-  
-    if (labels_dict["rave"] < alpha_bound){
-        rave();
-    }
-    // wishYouWereHere();
 }
 
 // STEP 3: Get the classification!
@@ -73,6 +107,7 @@ function gotResults(error, results) {
 
     for (let a = 0; a < labels_tm.length ; a += 1) { 
         labels_dict[labels_tm[a].label]=labels_tm[a].confidence * 255; 
+        labels_list.push(labels_tm[a].label)
     }
 
 }
@@ -165,7 +200,7 @@ function snowflake() {
   };
 
   this.display = function() {
-    fill(50,200);
+    fill(50,current_alpha);
     ellipse(this.posX, this.posY, this.size);
   };
 }
@@ -183,7 +218,6 @@ function rave(){
     inc = 75;
 
     // Setting the alpha (transparency) for the design
-    alpha = labels_dict["rave"];
 
     // the sketch
     for (let y = -5; y <= window.innerHeight + 180; y += 30) {
@@ -203,7 +237,7 @@ function rave(){
                 g = (row * 10);
                 b = (row * 20);
 
-                fill(r, g, b, alpha);
+                fill(r, g, b, current_alpha);
                  //increase diameter of each circle by 20px
                  d = icircle * 30;
 
