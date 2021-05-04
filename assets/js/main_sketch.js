@@ -45,11 +45,10 @@ function draw() {
     // Wait until the classifier starts to begin running sketches
     print(labels_dict)
     if (labels_list.length == 0){
-        console.log("Not executing");
         text(waiting_message, window.innerWidth/2, window.innerHeight/2);
         return;
     }
-
+    
     // Call each sketch
     for(i = 0; i < labels_list.length; i++){
 
@@ -104,7 +103,7 @@ function gotResults(error, results) {
     }
     // Store the labels
     labels_tm = results;
-
+    labels_list = [];
     for (let a = 0; a < labels_tm.length ; a += 1) { 
         labels_dict[labels_tm[a].label]=labels_tm[a].confidence * 255; 
         labels_list.push(labels_tm[a].label)
