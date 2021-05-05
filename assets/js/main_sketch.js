@@ -114,14 +114,50 @@ function gotResults(error, results) {
 
 ///////////////////////////////////////////////////////////////////
 // Black Hole Sketch
-function blackHole(){
-    background(50);
+function blackHole() {
+    background(150, 20, 99);
+    fill(255)
+    rectMode(CENTER);
+    line(0, 0, 800, 600);
+    rect(400, 300, 200, 100);
+    fill(200, 0, 130)
+    ellipseMode(RADIUS);
+    ellipse(400, 100, 200, 100);
+    fill(20, 0, 100);
+    ellipseMode(CENTER);
+    ellipse(400, 100, 200, 100);
+    fill(10, 10, 90);
+    ellipseMode(CORNER);
+    ellipse(400, 100, 200, 100);
+    fill(10, 20, 100, 200);
+    ellipseMode(CORNERS);
+    ellipse(700, 100, 200, 100);
 }
 
 ///////////////////////////////////////////////////////////////////
 // Banjo Sketch
-function banjo(){
-    background(100);
+function banjo() {
+    background(255);
+    strokeWeight(9);
+    fill(255, 0, 50, 100);
+    quad(350, 260, 450, 260, 350, 400, 200, 400);
+    ellipse(400, 200, 200, 150);
+    triangle(350, 155, 300, 120, 300, 200);
+    triangle(450, 150, 500, 120, 500, 200);
+    ellipse(400, 220, 90, 60);
+    point(380, 220);
+    point(420, 220);
+    fill(255);
+    circle(350, 190, 20);
+    circle(350, 190, 0);
+    fill(0);
+    circle(450, 190, 10);
+    line(420, 300, 560, 280);
+    line(200, 550, 150, 550);
+    line(250, 400, 150, 550);
+    ellipse(700, 150, 100);
+    fill(255);
+    ellipse(650, 150, 50);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -133,73 +169,171 @@ function birdSong(){
 ///////////////////////////////////////////////////////////////////
 // Ding Sketch
 function ding(){
-    background(200);
+    
 }
+// let message = 'tickle',
+//   font,
+//   bounds, // holds x, y, w, h of the text's bounding box
+//   fontsize = 60,
+//   x,
+//   y; // x and y coordinates of the text
 
+// function preload() {
+//   font = loadFont('assets/SourceSansPro-Regular.otf');
+// }
+
+// function setup() {
+//   createCanvas(710, 400);
+
+//   // set up the font
+//   textFont(font);
+//   textSize(fontsize);
+
+//   // get the width and height of the text so we can center it initially
+//   bounds = font.textBounds(message, 0, 0, fontsize);
+//   x = width / 2 - bounds.w / 2;
+//   y = height / 2 - bounds.h / 2;
+// }
+
+// function ding() {
+//   background(204, 120);
+
+//   // write the text in black and get its bounding box
+//   fill(0);
+//   text(message, x, y);
+//   bounds = font.textBounds(message, x, y, fontsize);
+
+//   // check if the mouse is inside the bounding box and tickle if so
+//   if (
+//     mouseX >= bounds.x &&
+//     mouseX <= bounds.x + bounds.w &&
+//     mouseY >= bounds.y &&
+//     mouseY <= bounds.y + bounds.h
+//   ) {
+//     x += random(-5, 5);
+//     y += random(-5, 5);
+//   }
+// }
+ 
 ///////////////////////////////////////////////////////////////////
 // Guitar Strum Sketch
-function guitarStrum(){
-    background(10);
+const Y_AXIS = 1;
+const X_AXIS = 2;
+let b1, b2, c1, c2;
+function guitarStrum() {
+  background(0);
+  c1 = color(random(255), random(255), random(255));
+  c2 = color(random(255), random(255), random(255));
+  // Foreground
+  setGradient(50, 90, 540, 80, c1, c2, Y_AXIS);
+  setGradient(50, 190, 540, 80, c2, c1, X_AXIS);
+}
+function setGradient(x1, y1, w1, h1, c1, c2, axis) {
+  noFill();
+  if (axis === Y_AXIS) {
+    // Top to bottom gradient
+    for (let i = y1; i <= y1 + h1; i++) {
+      let inter = map(i, y1, y1 + h1, 0, 1);
+      let c = lerpColor(c1, c2, inter);
+      stroke(c);
+      line(x1, i, x1 + w1, i);
+    }
+  } else if (axis === X_AXIS) {
+    // Left to right gradient
+    for (let i = x1; i <= x1 + w1; i++) {
+      let inter = map(i, x1, x1 + w1, 0, 1);
+      let c = lerpColor(c1, c2, inter);
+      stroke(c);
+      line(i, y1, i, y1 + h1);
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////
 // Percussion Sketch
-function percussive(){
-    background(225);
+let a = 0;
+function percussive() {
+  background(0);
+  frameRate(30);
+  stroke(250);
+  // Let's pick an angle 0 to 90 degrees based on the mouse position
+  // Convert it to radians
+  theta = radians(a);
+  // Start the tree from the bottom of the screen
+  translate(width / 2, height);
+  // Draw a line 120 pixels
+  line(0, 0, 0, -120);
+  // Move to the end of that line
+  translate(0, -120);
+  // Start the recursive branching!
+  branch(120);
+  a = a + 1 % 90
 }
+function branch(h) {
+  // Each branch will be 2/3rds the size of the previous one
+  h *= 0.66;
+  // All recursive functions must have an exit condition!!!!
+  // Here, ours is when the length of the branch is 2 pixels or less
+  if (h > 2) {
+    push(); // Save the current state of transformation (i.e. where are we now)
+    rotate(theta); // Rotate by theta
+    line(0, 0, 0, -h); // Draw the branch
+    translate(0, -h); // Move to the end of the branch
+    branch(h); // Ok, now call myself to draw two new branches!!
+    pop(); // Whenever we get back here, we "pop" in order to restore the previous matrix state
+    // Repeat the same thing, only branch off to the "left" this time!
+    push();
+    rotate(-theta);
+    line(0, 0, 0, -h);
+    translate(0, -h);
+    branch(h);
+    pop();
+  }
+}
+
 
 ///////////////////////////////////////////////////////////////////
 // Rain Sketch
 
-
-let snowflakes = []; // array to hold snowflake objects
-
+let raindrops = []; // array to hold snowflake objects
 function rain() {
   noStroke();
   let t = frameCount / 60; // update time
-
-  // create a random number of snowflakes each frame
+  // create a random number of raindrops each frame
   for (let i = 0; i < random(5); i++) {
-    snowflakes.push(new snowflake()); // append snowflake object
+    raindrops.push(new raindrop()); // append raindrop object
   }
-
-  // loop through snowflakes with a for..of loop
-  for (let flake of snowflakes) {
-    flake.update(t); // update snowflake position
-    flake.display(); // draw snowflake
+  // loop through raindrops with a for..of loop
+  for (let drop of raindrops) {
+    drop.update(t); // update raindrop position
+    drop.display(); // draw raindrop
   }
 }
-
-// snowflake class
-function snowflake() {
+// raindrop class
+function raindrop() {
   // initialize coordinates
   this.posX = 0;
   this.posY = random(-50, 0);
   this.initialangle = random(0, 2 * PI);
   this.size = random(2, 5);
-
-  // radius of snowflake spiral
+  // radius of raindrop spiral
   // chosen so the snowflakes are uniformly spread out in area
   this.radius = sqrt(random(pow(width / 2, 2)));
-
   this.update = function(time) {
     // x position follows a circle
     let w = 0.6; // angular speed
     let angle = w * time + this.initialangle;
     this.posX = width / 2 + this.radius * sin(angle);
-
-    // different size snowflakes fall at slightly different y speeds
+    // different size raindrops fall at slightly different y speeds
     this.posY += pow(this.size, 0.5);
-
-    // delete snowflake if past end of screen
+    // delete raindrop if past end of screen
     if (this.posY > height) {
-      let index = snowflakes.indexOf(this);
-      snowflakes.splice(index, 1);
+      let index = raindrops.indexOf(this);
+      raindrops.splice(index, 1);
     }
   };
-
   this.display = function() {
-    fill(50,current_alpha);
+    fill(50, current_alpha);
     ellipse(this.posX, this.posY, this.size);
   };
 }
@@ -253,6 +387,26 @@ function rave(){
 
 ///////////////////////////////////////////////////////////////////
 // Wish You Were Here Sketch
-function wishYouWereHere(){
-
+let dim;
+function wishYouWereHere() {
+  dim = width / 2;
+  background(0);
+  colorMode(HSB, 360, 100, 100);
+  noStroke();
+  ellipseMode(RADIUS);
+  frameRate(1);
+  for (let x = 0; x <= width; x += dim) {
+    drawGradient(x, height / 2);
+  }
 }
+function drawGradient(x, y) {
+  let radius = dim / 2;
+  let h = random(0, 360);
+  for (let r = radius; r > 0; --r) {
+    fill(h, 90, 90);
+    ellipse(x, y, r, r);
+    h = (h + 1) % 360;
+  }
+}
+
+
