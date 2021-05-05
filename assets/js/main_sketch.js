@@ -90,7 +90,7 @@ function draw() {
             wishYouWereHere();
         }
         else if(labels_dict["Background Noise"] > 255 - alpha_bound){
-            text("Background", window.innerWidth/2, window.innerHeight/2);
+            text("**Crickets**", window.innerWidth/2, window.innerHeight/2);
             break;
         }
     }
