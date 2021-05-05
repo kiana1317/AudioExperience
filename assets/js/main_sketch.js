@@ -89,7 +89,7 @@ function draw() {
         else if(current_label == "wish you were here"){
             wishYouWereHere();
         }
-        else if(labels_dict["Background Noise"] > 255 - alpha_bound){
+        else if(labels_dict["Background Noise"] > 255/2){
             text("**Crickets**", window.innerWidth/2, window.innerHeight/2);
             break;
         }
