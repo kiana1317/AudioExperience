@@ -63,6 +63,7 @@ function draw() {
         }
         else if(current_label == "Black Hole"){
             blackHole();
+            // console.log("hi");
         }
         else if(current_label == "banjo"){
             banjo();
@@ -130,16 +131,20 @@ function blackHole() {
     ellipseMode(CORNER);
     ellipse(400, 100, 200, 100);
     fill(10, 20, 100, 200);
-    ellipseMode(CORNERS);
+    // This code creates a large blob in the corner
+    // ellipseMode(CORNERS);
     ellipse(700, 100, 200, 100);
 }
 
 ///////////////////////////////////////////////////////////////////
 // Banjo Sketch
+// Pig
 function banjo() {
-    background(255);
+    // Stroke adjustment
+    let alpha_adjustment = current_alpha / 255;
+
     strokeWeight(9);
-    fill(255, 0, 50, 100);
+    fill(255, 0, 50, 100 * alpha_adjustment);
     quad(350, 260, 450, 260, 350, 400, 200, 400);
     ellipse(400, 200, 200, 150);
     triangle(350, 155, 300, 120, 300, 200);
@@ -147,16 +152,17 @@ function banjo() {
     ellipse(400, 220, 90, 60);
     point(380, 220);
     point(420, 220);
-    fill(255);
+    fill(255, current_alpha);
     circle(350, 190, 20);
     circle(350, 190, 0);
-    fill(0);
+    fill(0, current_alpha);
     circle(450, 190, 10);
+    stroke(0, current_alpha);
     line(420, 300, 560, 280);
     line(200, 550, 150, 550);
     line(250, 400, 150, 550);
     ellipse(700, 150, 100);
-    fill(255);
+    fill(255, current_alpha);
     ellipse(650, 150, 50);
 }
 
@@ -221,7 +227,7 @@ const Y_AXIS = 1;
 const X_AXIS = 2;
 let b1, b2, c1, c2;
 function guitarStrum() {
-  background(0);
+  background(0, current_alpha);
   c1 = color(random(255), random(255), random(255));
   c2 = color(random(255), random(255), random(255));
   // Foreground
@@ -253,7 +259,7 @@ function setGradient(x1, y1, w1, h1, c1, c2, axis) {
 // Percussion Sketch
 let a = 0;
 function percussive() {
-  background(0);
+  background(0, current_alpha);
   frameRate(30);
   stroke(250);
   // Let's pick an angle 0 to 90 degrees based on the mouse position
@@ -333,7 +339,7 @@ function raindrop() {
     }
   };
   this.display = function() {
-    fill(50, current_alpha);
+    fill(24, 36, 59, current_alpha);
     ellipse(this.posX, this.posY, this.size);
   };
 }
@@ -349,9 +355,6 @@ function rave(){
     // This is the information that would go in the design
     row = 0;
     inc = 75;
-
-    // Setting the alpha (transparency) for the design
-
     // the sketch
     for (let y = -5; y <= window.innerHeight + 180; y += 30) {
 
@@ -390,7 +393,7 @@ function rave(){
 let dim;
 function wishYouWereHere() {
   dim = width / 2;
-  background(0);
+//   background(0);
   colorMode(HSB, 360, 100, 100);
   noStroke();
   ellipseMode(RADIUS);
@@ -400,10 +403,11 @@ function wishYouWereHere() {
   }
 }
 function drawGradient(x, y) {
+  
   let radius = dim / 2;
   let h = random(0, 360);
   for (let r = radius; r > 0; --r) {
-    fill(h, 90, 90);
+    fill(h, 90, 90, current_alpha);
     ellipse(x, y, r, r);
     h = (h + 1) % 360;
   }
