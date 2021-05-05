@@ -56,7 +56,7 @@ function draw() {
 
         // Stores the current alpha value
         current_alpha = labels_dict[current_label];
-
+ 
         // Check if the confidence is high enough to render
         if (labels_dict[current_label] < alpha_bound){
             break;
@@ -168,58 +168,220 @@ function banjo() {
 
 ///////////////////////////////////////////////////////////////////
 // Bird Song Sketch
-function birdSong(){
-    background(150);
+// Source: https://p5js.org/examples/hello-p5-flocking.html
+let boids = [];
+
+function birdSong() {
+//   background(51);
+    if (boids.length == 0){
+        // Add an initial set of boids into the system
+        for (let i = 0; i < 100; i++) {
+            boids[i] = new Boid(random(width), random(height));
+          }
+    }
+  // Run all the boids
+  for (let i = 0; i < boids.length; i++) {
+    boids[i].run(boids);
+  }
 }
+
+// Boid class
+// Methods for Separation, Cohesion, Alignment added
+class Boid {
+  constructor(x, y) {
+    this.acceleration = createVector(0, 0);
+    this.velocity = p5.Vector.random2D();
+    this.position = createVector(x, y);
+    this.r = 3.0;
+    this.maxspeed = 3;    // Maximum speed
+    this.maxforce = 0.05; // Maximum steering force
+  }
+
+  run(boids) {
+    this.flock(boids);
+    this.update();
+    this.borders();
+    this.render();
+  }
+  
+  // Forces go into acceleration
+  applyForce(force) {
+    this.acceleration.add(force);
+  }
+  
+  // We accumulate a new acceleration each time based on three rules
+  flock(boids) {
+    let sep = this.separate(boids); // Separation
+    let ali = this.align(boids);    // Alignment
+    let coh = this.cohesion(boids); // Cohesion
+    // Arbitrarily weight these forces
+    sep.mult(2.5);
+    ali.mult(1.0);
+    coh.mult(1.0);
+    // Add the force vectors to acceleration
+    this.applyForce(sep);
+    this.applyForce(ali);
+    this.applyForce(coh);
+  }
+  
+  // Method to update location
+  update() {
+    // Update velocity
+    this.velocity.add(this.acceleration);
+    // Limit speed
+    this.velocity.limit(this.maxspeed);
+    this.position.add(this.velocity);
+    // Reset acceleration to 0 each cycle
+    this.acceleration.mult(0);
+  }
+  
+  // A method that calculates and applies a steering force towards a target
+  // STEER = DESIRED MINUS VELOCITY
+  seek(target) {
+    let desired = p5.Vector.sub(target, this.position); // A vector pointing from the location to the target
+    // Normalize desired and scale to maximum speed
+    desired.normalize();
+    desired.mult(this.maxspeed);
+    // Steering = Desired minus Velocity
+    let steer = p5.Vector.sub(desired, this.velocity);
+    steer.limit(this.maxforce); // Limit to maximum steering force
+    return steer;
+  }
+  
+  // Draw boid as a circle
+  render() {
+    let theta = this.velocity.heading() + radians(90);
+    fill(0,157,174, current_alpha);
+    // ki8
+    push();
+    translate(this.position.x, this.position.y);
+    rotate(theta);
+    beginShape();
+    fill(0,157,174, current_alpha);
+    vertex(0, -this.r * 2);
+    vertex(-this.r, this.r * 2);
+    vertex(this.r, this.r * 2);
+    endShape(CLOSE);
+    pop();
+  }
+  
+  // Wraparound
+  borders() {
+    if (this.position.x < -this.r) this.position.x = width + this.r;
+    if (this.position.y < -this.r) this.position.y = height + this.r;
+    if (this.position.x > width + this.r) this.position.x = -this.r;
+    if (this.position.y > height + this.r) this.position.y = -this.r;
+  }
+  
+  // Separation
+  // Method checks for nearby boids and steers away
+  separate(boids) {
+    let desiredseparation = 25.0;
+    let steer = createVector(0, 0);
+    let count = 0;
+    // For every boid in the system, check if it's too close
+    for (let i = 0; i < boids.length; i++) {
+      let d = p5.Vector.dist(this.position, boids[i].position);
+      // If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
+      if ((d > 0) && (d < desiredseparation)) {
+        // Calculate vector pointing away from neighbor
+        let diff = p5.Vector.sub(this.position, boids[i].position);
+        diff.normalize();
+        diff.div(d); // Weight by distance
+        steer.add(diff);
+        count++; // Keep track of how many
+      }
+    }
+    // Average -- divide by how many
+    if (count > 0) {
+      steer.div(count);
+    }
+  
+    // As long as the vector is greater than 0
+    if (steer.mag() > 0) {
+      // Implement Reynolds: Steering = Desired - Velocity
+      steer.normalize();
+      steer.mult(this.maxspeed);
+      steer.sub(this.velocity);
+      steer.limit(this.maxforce);
+    }
+    return steer;
+  }
+  
+  // Alignment
+  // For every nearby boid in the system, calculate the average velocity
+  align(boids) {
+    let neighbordist = 50;
+    let sum = createVector(0, 0);
+    let count = 0;
+    for (let i = 0; i < boids.length; i++) {
+      let d = p5.Vector.dist(this.position, boids[i].position);
+      if ((d > 0) && (d < neighbordist)) {
+        sum.add(boids[i].velocity);
+        count++;
+      }
+    }
+    if (count > 0) {
+      sum.div(count);
+      sum.normalize();
+      sum.mult(this.maxspeed);
+      let steer = p5.Vector.sub(sum, this.velocity);
+      steer.limit(this.maxforce);
+      return steer;
+    } else {
+      return createVector(0, 0);
+    }
+  }
+  
+  // Cohesion
+  // For the average location (i.e. center) of all nearby boids, calculate steering vector towards that location
+  cohesion(boids) {
+    let neighbordist = 50;
+    let sum = createVector(0, 0); // Start with empty vector to accumulate all locations
+    let count = 0;
+    for (let i = 0; i < boids.length; i++) {
+      let d = p5.Vector.dist(this.position, boids[i].position);
+      if ((d > 0) && (d < neighbordist)) {
+        sum.add(boids[i].position); // Add location
+        count++;
+      }
+    }
+    if (count > 0) {
+      sum.div(count);
+      return this.seek(sum); // Steer towards the location
+    } else {
+      return createVector(0, 0);
+    }
+  }  
+}
+
+
+
 
 ///////////////////////////////////////////////////////////////////
 // Ding Sketch
-function ding(){
-    
+let setup_complete = false;
+let radius_ding = 30;
+
+function ding() {
+//   background(204, current_alpha);
+  if (setup_complete == false){
+    x =window.innerWidth/2;
+    y = window.innerHeight/2;
+    setup_complete = true;
+  }
+    x += random(-5, 5);
+    while (x < radius_ding || x> window.innerWidth + radius_ding){
+        x += random(-5, 5);
+    }
+    y += random(-5, 5);
+    while(y + radius_ding < radius_ding || y > window.innerHeight + radius_ding){
+        y += random(-5,5);
+    }
+    fill(254, 189, 22, current_alpha);
+    stroke(124, 92, 11, current_alpha);
+    ellipse(x, y, radius_ding * 2);
 }
-// let message = 'tickle',
-//   font,
-//   bounds, // holds x, y, w, h of the text's bounding box
-//   fontsize = 60,
-//   x,
-//   y; // x and y coordinates of the text
-
-// function preload() {
-//   font = loadFont('assets/SourceSansPro-Regular.otf');
-// }
-
-// function setup() {
-//   createCanvas(710, 400);
-
-//   // set up the font
-//   textFont(font);
-//   textSize(fontsize);
-
-//   // get the width and height of the text so we can center it initially
-//   bounds = font.textBounds(message, 0, 0, fontsize);
-//   x = width / 2 - bounds.w / 2;
-//   y = height / 2 - bounds.h / 2;
-// }
-
-// function ding() {
-//   background(204, 120);
-
-//   // write the text in black and get its bounding box
-//   fill(0);
-//   text(message, x, y);
-//   bounds = font.textBounds(message, x, y, fontsize);
-
-//   // check if the mouse is inside the bounding box and tickle if so
-//   if (
-//     mouseX >= bounds.x &&
-//     mouseX <= bounds.x + bounds.w &&
-//     mouseY >= bounds.y &&
-//     mouseY <= bounds.y + bounds.h
-//   ) {
-//     x += random(-5, 5);
-//     y += random(-5, 5);
-//   }
-// }
  
 ///////////////////////////////////////////////////////////////////
 // Guitar Strum Sketch
@@ -274,6 +436,7 @@ function percussive() {
   // Start the recursive branching!
   branch(120);
   a = a + 1 % 90
+  translate(0,0);
 }
 function branch(h) {
   // Each branch will be 2/3rds the size of the previous one
