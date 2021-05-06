@@ -1,4 +1,35 @@
-body {    
-    margin: 0 !important;
-    padding: 0 !important;
+*{
+    margin:0px;
+    padding:0px;
+    box-sizing:border-box;
+}
+
+/* Control Panel */
+#controller{
+    position: absolute;
+    top: 2.5%;
+    left: 2.5%;
+    z-index: +1;
+    padding: 1%;
+    color:white;
+}
+
+#controller > text{
+    color: white;
+}
+
+.button{
+    background-color: gray;
+    color:white;
+    padding: 8px;
+    margin-top: 5px;
+    box-shadow: 10px 12px 12px rgba(0, 0, 0, .7);
+    border: 1px solid black;
+
+}
+
+.button:hover{
+    border: 2px solid black;
+    color:blue;
+    font-size: medium;
 }
